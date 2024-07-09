@@ -11,6 +11,6 @@ document.getElementById("comecar").addEventListener("click", ()=> {
     else {
         jogoComecou = true
         jogo.Recomecar();
-        jogo.Loop();
+        document.getElementById("comecar").textContent = "Recomeçar";
     }
 });

@@ -36,6 +36,7 @@ export class Entidade {
     }
 
     Desenhar() {
+        this.#contexto.font = `${this.#tamanho}px Arial`;
         this.#contexto.fillText(this.#emoji, this.#x, this.#y);
     }
 
@@ -48,11 +49,11 @@ export class Entidade {
     }
 
     Movimento(largura, altura) {
-        if (this.#x + this.#vx + this.#tamanho >= largura || this.#x + this.#vx <= 0) {
+        if (this.#x+this.#tamanho/2 >= largura || this.#x - this.#tamanho/2 <= 0) {
             this.#vx = -this.#vx;
         }
 
-        if (this.#y + this.#vy >= altura || this.#y + this.#vy - this.#tamanho <= 0) {
+        if (this.#y + this.#tamanho/2 >= altura || this.#y - this.#tamanho/2 <= 0) {
             this.#vy = -this.#vy;
         }
 

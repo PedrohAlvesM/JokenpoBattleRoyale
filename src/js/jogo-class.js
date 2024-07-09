@@ -15,6 +15,9 @@ export class Jogo {
 
     #jogo;
     #ctx;
+
+    #ALTURA_HUD = 30;
+    #TAMANHO_FONTE = 18;
     
     Start() {
         this.#gameOver = false;
@@ -29,44 +32,37 @@ export class Jogo {
         
         this.#entidades = [];
         this.#tamanhoEmoji = Number(document.getElementById("tamanho-entidade").value) ?? 24;
-        this.#NUMERO_POR_ENTIDADES = Number(document.getElementById("n-entidade").value )?? 10;
+        this.#NUMERO_POR_ENTIDADES = Number(document.getElementById("n-entidade").value) ?? 10;
         this.#nPedra = this.#NUMERO_POR_ENTIDADES;
         this.#nPapel = this.#NUMERO_POR_ENTIDADES;
         this.#nTesoura = this.#NUMERO_POR_ENTIDADES;
 
-        document.getElementById("numero-pedra").innerText = `Pedra: ${this.#NUMERO_POR_ENTIDADES}`;
-        document.getElementById("numero-papel").innerText = `Papel: ${this.#NUMERO_POR_ENTIDADES}`;
-        document.getElementById("numero-tesoura").innerText = `Tesoura: ${this.#NUMERO_POR_ENTIDADES}`;
-
         for (let i = 0; i < this.#NUMERO_POR_ENTIDADES; i++) {
             const e = new Entidade("pedra", this.#ctx, this.#tamanhoEmoji);
-            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#tamanhoEmoji });
+            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#ALTURA_HUD+5 });
             this.#entidades.push(e);
         }
         for (let i = 0; i < this.#NUMERO_POR_ENTIDADES; i++) {
             const e = new Entidade("papel", this.#ctx, this.#tamanhoEmoji);
-            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#tamanhoEmoji });
+            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#ALTURA_HUD+5 });
             this.#entidades.push(e);
         }
         for (let i = 0; i < this.#NUMERO_POR_ENTIDADES; i++) {
             const e = new Entidade("tesoura", this.#ctx, this.#tamanhoEmoji);
-            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#tamanhoEmoji });
+            e.PosicaoInicial({ min: this.#tamanhoEmoji, max: this.#jogo.width - this.#tamanhoEmoji }, { min: this.#tamanhoEmoji, max: this.#jogo.height - this.#ALTURA_HUD+5 });
             this.#entidades.push(e);
         }
         this.#entidades.forEach(e => e.Desenhar());
+        this.DesenhaHUD();
     }
 
 
     Loop() {
         this.#ctx.clearRect(0, 0, this.#jogo.width, this.#jogo.height);
+        this.DesenhaHUD();
 
         this.#entidades.forEach(e => e.Desenhar());
-        this.#entidades.forEach(e => e.Movimento(this.#jogo.width, this.#jogo.height));
-
-        document.getElementById("numero-pedra").innerText = "Pedras: " + this.#nPedra;
-        document.getElementById("numero-papel").innerText = "Papel: " + this.#nPapel;
-        document.getElementById("numero-tesoura").innerText = "Tesouras: " + this.#nTesoura;
-        document.getElementById("tempo-perdido").innerText = "Tempo perdido assistindo isso: " + this.#tempoPerdido + " segundos";
+        this.#entidades.forEach(e => e.Movimento(this.#jogo.width, this.#jogo.height-this.#ALTURA_HUD));
 
         if (this.#nPapel >= this.#NUMERO_POR_ENTIDADES * 3 || this.#nPedra >= this.#NUMERO_POR_ENTIDADES * 3 || this.#nTesoura >= this.#NUMERO_POR_ENTIDADES * 3) {
             clearInterval(this.#IDContador);
@@ -77,6 +73,17 @@ export class Jogo {
             this.Colisao();
             window.requestAnimationFrame(this.Loop.bind(this));
         }
+    }
+
+    DesenhaHUD() {
+        this.#ctx.fillStyle = "rgb(239 68 68)";
+        this.#ctx.fillRect(0, this.#jogo.height - this.#ALTURA_HUD, this.#jogo.width, this.#ALTURA_HUD);
+
+        this.#ctx.fillStyle = "white";
+        this.#ctx.font = `${this.#TAMANHO_FONTE}px Arial`;
+        this.#ctx.textBaseline = "middle";
+        this.#ctx.textAlign = "center";
+        this.#ctx.fillText(`Pedra: ${this.#nPedra} Papel: ${this.#nPapel} Tesoura: ${this.#nTesoura} Tempo perdido: ${this.#tempoPerdido}s`, this.#jogo.width/2, (this.#jogo.height - this.#ALTURA_HUD)+this.#ALTURA_HUD/2, this.#jogo.width);
     }
 
     Colisao() {
@@ -128,6 +135,7 @@ export class Jogo {
         this.#gameOver = false;
         clearInterval(this.#IDContador);
         this.Start();
+        this.Loop();
     }
 
     get gameOver() {
@@ -220,5 +228,26 @@ export class Jogo {
 
     get NUMERO_POR_ENTIDADES() {
         return this.#NUMERO_POR_ENTIDADES;
+    }
+
+    get ALTURA_HUD() {
+        return this.#ALTURA_HUD;
+    }
+    
+    set ALTURA_HUD(valor) {
+        if (typeof valor != "number") {
+            throw new Error("Altura do HUD deve ser do tipo number");
+        }
+        this.#ALTURA_HUD = valor;
+    }
+    get TAMANHO_FONTE() {
+        return this.#TAMANHO_FONTE;
+    }
+    
+    set TAMANHO_FONTE(valor) {
+        if (typeof valor != "number") {
+            throw new Error("Tamanho da fonte deve ser do tipo number");
+        }
+        this.#TAMANHO_FONTE = valor;
     }
 }
